@@ -15,8 +15,8 @@ def main():
         while True:
             data = conn.recv(1024)
             # print(data)
-            if b"ping\r\n" in data:
-            # if data==b"*1\r\n$4\r\nping\r\n":
+            # if b"ping\r\n" in data:
+            if data==b"*1\r\n$4\r\nping\r\n":
                 conn.sendall(b"+PONG\r\n")
             else:
                 conn.sendall(b"-Error message\r\n")
