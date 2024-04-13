@@ -1,5 +1,6 @@
 
 class RESPParser:
+    NULL_STRING = "-1"
     @staticmethod
     def process(string):
         """
