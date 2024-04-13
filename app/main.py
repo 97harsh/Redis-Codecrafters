@@ -13,7 +13,7 @@ def threaded(c):
         if data==b"*1\r\n$4\r\nping\r\n":
             c.send(b"+PONG\r\n")
         elif b"$4\r\necho\r\n" in data:
-            new_data = data[data.find(b"$4\r\necho\r\n")+len("$4\r\necho\r\n"):])
+            new_data = data[data.find(b"$4\r\necho\r\n")+len("$4\r\necho\r\n"):]
             new_data = new_data[new_data.find(b"\r\n")+len("\r\n"):]
             c.send(b"+"+new_data)
         else:
