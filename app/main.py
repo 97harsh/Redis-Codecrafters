@@ -19,7 +19,7 @@ def threaded(c):
         elif Redis.ECHO in data:
             c.send(RESPParser.convert_string_to_resp(data[Redis.ECHO]))
         elif Redis.SET in data:
-            redis_object.set_memory(data[Redis.SET][1],data[Redis.SET][1],data)
+            redis_object.set_memory(data[Redis.SET][0],data[Redis.SET][1],data)
             c.send(RESPParser.convert_string_to_resp("OK"))
             print(redis_object.memory)
             print(redis_object.timeout)
