@@ -49,7 +49,9 @@ class Redis:
             return False
         key_entered_time = self.timeout[key][0]
         key_life = self.timeout[key][1]
-        if current_milli_time()-key_entered_time>key_life:
+        current_time = current_milli_time()
+        print(current_time)
+        if current_time-key_entered_time>key_life:
             return True
         return False
     
