@@ -1,6 +1,7 @@
 # Uncomment this to pass the first stage
 import socket
 import threading
+from parse import RESPParser
 # from _thread import start_new_thread
 # print_lock = threading.Lock()
 
@@ -10,12 +11,13 @@ def threaded(c):
         data = c.recv(1024)
         if not data:
             break
-        if data==b"*1\r\n$4\r\nping\r\n":
-            c.send(b"+PONG\r\n")
-        elif b"$4\r\necho\r\n" in data:
-            new_data = data[data.find(b"$4\r\necho\r\n")+len("$4\r\necho\r\n"):]
-            new_data = new_data[new_data.find(b"\r\n")+len("\r\n"):]
-            c.send(b"+"+new_data)
+        data = RESPParser.process(data)
+        if data[0]==b"ping":
+            c.send(RESPParser.convert_string_to_resp(b"PONG"))
+        elif data[0]==b'echo':
+            # new_data = data[data.find(b"$4\r\necho\r\n")+len("$4\r\necho\r\n"):]
+            # new_data = new_data[new_data.find(b"\r\n")+len("\r\n"):]
+            c.send(RESPParser.convert_string_to_resp(data[1]))
         else:
             c.send(b"-Error message\r\n")
     c.close()
