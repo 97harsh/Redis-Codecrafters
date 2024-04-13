@@ -21,14 +21,14 @@ class Redis:
         self.memory = {}
         self.timeout = {} # Stores, current time, timeout in ms
 
-    def set_memory(self, key, value, **args):
+    def set_memory(self, key, value, data):
         """
         Stores key value pair in memory 
         """
         key = RESPParser.convert_to_string(key)
         value = RESPParser.convert_to_string(value)
-        if Redis.PX in args:
-            self.timeout[key] = [current_milli_time(),args[Redis.PX]]
+        if Redis.PX in data:
+            self.timeout[key] = [current_milli_time(),data[Redis.PX]]
         self.memory[key] = value
         return
 
