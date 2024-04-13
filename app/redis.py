@@ -28,7 +28,8 @@ class Redis:
         key = RESPParser.convert_to_string(key)
         value = RESPParser.convert_to_string(value)
         if Redis.PX in data:
-            self.timeout[key] = [current_milli_time(),data[Redis.PX]]
+            self.timeout[key] = [current_milli_time(),
+                                 RESPParser.convert_to_int(data[Redis.PX])]
         self.memory[key] = value
         return
 

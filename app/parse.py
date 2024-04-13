@@ -65,7 +65,7 @@ class RESPParser:
     @staticmethod
     def convert_to_string(input):
         if isinstance(input, str):
-            return str
+            return input
         elif isinstance(input,bytes):
             return input.decode('UTF-8')
         elif isinstance(input,int):
@@ -73,3 +73,16 @@ class RESPParser:
         else:
             raise ValueError(f"Expected input to be string, bytes or integer, \
                              but found {input} of type {type(input)}")
+
+    @staticmethod
+    def convert_to_int(input):
+        if isinstance(input, int):
+            return input
+        elif isinstance(input, str):
+            return int(str)
+        elif isinstance(input, bytes):
+            return int(input)
+        else:
+            raise ValueError(f"Expected input to be int, bytes or integer, \
+                             but found {input} of type {type(input)}")
+        
