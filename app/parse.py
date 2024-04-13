@@ -41,7 +41,7 @@ class RESPParser:
     
     def convert_string_to_bulk_string_resp(input):
         length = RESPParser.convert_to_binary(len(input))
-        input_processed = "$"+length+b"\r\n"+\
+        input_processed = b"$"+length+b"\r\n"+\
             RESPParser.convert_to_binary(input)+b"\r\n"
         return input_processed
 
