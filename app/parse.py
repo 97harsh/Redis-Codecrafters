@@ -1,6 +1,6 @@
 
 class RESPParser:
-    NULL_STRING = "-1"
+    NULL_STRING = b"$-1\r\n"
     @staticmethod
     def process(string):
         """
@@ -34,11 +34,17 @@ class RESPParser:
         return input_processed
     
     @staticmethod
-    def convert_string_to_resp(input):
+    def convert_string_to_simple_string_resp(input):
         input_processed = b"+"+RESPParser.convert_to_binary(input)+\
             b"\r\n"
         return input_processed
     
+    def convert_string_to_bulk_string_resp(input):
+        length = RESPParser.convert_to_binary(len(input))
+        input_processed = "$"+length+b"\r\n"+\
+            RESPParser.convert_to_binary(input)+b"\r\n"
+        return input_processed
+
     @staticmethod
     def convert_list_to_resp(input):
         length = RESPParser.convert_to_binary(len(input))
