@@ -12,6 +12,8 @@ def threaded(c):
             break
         if data==b"*1\r\n$4\r\nping\r\n":
             c.send(b"+PONG\r\n")
+        elif b"$4\r\necho\r\n" in data:
+            c.send(b"+"+data[len("*2\r\n$4\r\necho\r\n"):])
         else:
             c.send(b"-Error message\r\n")
     c.close()
