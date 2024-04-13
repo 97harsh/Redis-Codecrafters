@@ -6,15 +6,14 @@ import threading
 
 def threaded(c):
     # Function gets the connection, checks if it got a ping, returns a pong to it
-    # while True:
-    data = c.recv(1024)
-    # if not data:
-    #     print_lock.release()
-    #     break
-    if data==b"*1\r\n$4\r\nping\r\n":
-        c.send(b"+PONG\r\n")
-    else:
-        c.send(b"-Error message\r\n")
+    while True:
+        data = c.recv(1024)
+        if not data:
+            break
+        if data==b"*1\r\n$4\r\nping\r\n":
+            c.send(b"+PONG\r\n")
+        else:
+            c.send(b"-Error message\r\n")
     c.close()
 
 def main():
