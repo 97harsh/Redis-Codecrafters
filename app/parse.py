@@ -2,8 +2,9 @@
 class RESPParser:
     @staticmethod
     def process(string):
-        print(string)
-        # breakpoint()
+        """
+        Function identified appropriate way to parse the information in RESP format
+        """
         if string[0:1]==b"+":
             result = RESPParser.process_simple_string(string)
         elif string[0:1]==b"*":

@@ -20,7 +20,7 @@ def threaded(c):
         elif data[0]==b'set':
             redis_object.set_memory(data[1],data[2])
             c.send(RESPParser.convert_string_to_resp("OK"))
-        elif data[1]==b'get':
+        elif data[0]==b'get':
             result = redis_object.get_memory(data[1])
             c.send(RESPParser.convert_string_to_resp(result))
         else:
