@@ -1,9 +1,10 @@
 # Uncomment this to pass the first stage
 import socket
 import threading
-from parse import RESPParser
+from app.parse import RESPParser
+from app.redis import Redis
 # from _thread import start_new_thread
-# print_lock = threading.Lock()
+redis_object = Redis()
 
 def threaded(c):
     # Function gets the connection, checks if it got a ping, returns a pong to it
@@ -15,9 +16,13 @@ def threaded(c):
         if data[0]==b"ping":
             c.send(RESPParser.convert_string_to_resp(b"PONG"))
         elif data[0]==b'echo':
-            # new_data = data[data.find(b"$4\r\necho\r\n")+len("$4\r\necho\r\n"):]
-            # new_data = new_data[new_data.find(b"\r\n")+len("\r\n"):]
             c.send(RESPParser.convert_string_to_resp(data[1]))
+        elif data[0]==b'set':
+            redis_object.set_memory(data[1],data[2])
+            c.send(RESPParser.convert_string_to_resp("OK"))
+        elif data[1]==b'get':
+            result = redis_object.get_memory(data[1])
+            c.send(RESPParser.convert_string_to_resp(result))
         else:
             c.send(b"-Error message\r\n")
     c.close()
@@ -37,23 +42,7 @@ def main():
         print(f"Connected by {addr[0]}")
         t = threading.Thread(target=threaded, args=(c,))
         t.start()
-        # print_lock.acquire()
-        
-        # start_new_thread(threaded, (c,))
-    sock.close()
-    # server_socket = socket.create_server(("localhost", 6379), reuse_port=True)
-    # conn, addr = server_socket.accept() # wait for client
-    # with conn:
-    #     print(f"Connected by {addr}")
-    #     while True:
-    #         data = conn.recv(1024)
-    #         # print(data)
-    #         # if b"ping\r\n" in data:
-    #         if data==b"*1\r\n$4\r\nping\r\n":
-    #             conn.send(b"+PONG\r\n")
-    #         else:
-    #             conn.send(b"-Error message\r\n")
-    
+
 
 
 if __name__ == "__main__":

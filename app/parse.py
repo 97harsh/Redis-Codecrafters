@@ -33,23 +33,23 @@ class RESPParser:
     
     @staticmethod
     def convert_string_to_resp(input):
-        input_processed = b"+"+RESPParser.convert_string_binary(input)+\
+        input_processed = b"+"+RESPParser.convert_to_binary(input)+\
             b"\r\n"
         return input_processed
     
     @staticmethod
     def convert_list_to_resp(input):
-        length = RESPParser.convert_string_binary(len(input))
+        length = RESPParser.convert_to_binary(len(input))
         output = b"*"+length
         for item in input:
-            len_str = RESPParser.convert_string_binary(len(item))
+            len_str = RESPParser.convert_to_binary(len(item))
             output += "$"+len_str+b"\r\n"+\
-                RESPParser.convert_string_binary(item)+\
+                RESPParser.convert_to_binary(item)+\
                     b"\r\n"
         return output
 
     @staticmethod
-    def convert_string_binary(input):
+    def convert_to_binary(input):
         if isinstance(input,bytes):
             return input
         elif isinstance(input,str):
@@ -57,4 +57,17 @@ class RESPParser:
         elif isinstance(input,int):
             return str(input).encode('UTF-8')
         else:
-            raise ValueError("Unexpected input format")
+            raise ValueError(f"Expected input to be string, bytes or integer, \
+                             but found {input} of type {type(input)}")
+
+    @staticmethod
+    def convert_to_string(input):
+        if isinstance(input, str):
+            return str
+        elif isinstance(input,bytes):
+            return input.decode('UTF-8')
+        elif isinstance(input,int):
+            return str(input)
+        else:
+            raise ValueError(f"Expected input to be string, bytes or integer, \
+                             but found {input} of type {type(input)}")
