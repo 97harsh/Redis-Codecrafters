@@ -22,6 +22,8 @@ def threaded(c):
             c.send(RESPParser.convert_string_to_resp("OK"))
         elif data[0]==b'get':
             result = redis_object.get_memory(data[1])
+            if result is None:
+                result = RESPParser.NULL_STRING
             c.send(RESPParser.convert_string_to_resp(result))
         else:
             c.send(b"-Error message\r\n")
