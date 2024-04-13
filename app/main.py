@@ -13,15 +13,16 @@ def threaded(c):
         if not data:
             break
         data = RESPParser.process(data)
-        if data[0]==b"ping":
+        data = redis_object.parse_arguments(data)
+        if Redis.PING in data:
             c.send(RESPParser.convert_string_to_resp(b"PONG"))
-        elif data[0]==b'echo':
-            c.send(RESPParser.convert_string_to_resp(data[1]))
-        elif data[0]==b'set':
-            redis_object.set_memory(data[1],data[2])
+        elif Redis.ECHO in data:
+            c.send(RESPParser.convert_string_to_resp(data[Redis.ECHO]))
+        elif Redis.SET in data:
+            redis_object.set_memory(data[Redis.SET][1],data[Redis.SET][1],data)
             c.send(RESPParser.convert_string_to_resp("OK"))
-        elif data[0]==b'get':
-            result = redis_object.get_memory(data[1])
+        elif Redis.GET in data:
+            result = redis_object.get_memory(data[Redis.GET])
             if result is None:
                 result = RESPParser.NULL_STRING
             c.send(RESPParser.convert_string_to_resp(result))

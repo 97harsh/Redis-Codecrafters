@@ -27,8 +27,8 @@ class Redis:
         """
         key = RESPParser.convert_to_string(key)
         value = RESPParser.convert_to_string(value)
-        if 'px' in args:
-            self.timeout[key] = [current_milli_time(),args['px']]
+        if Redis.PX in args:
+            self.timeout[key] = [current_milli_time(),args[Redis.PX]]
         self.memory[key] = value
         return
 
