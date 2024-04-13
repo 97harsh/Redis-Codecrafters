@@ -1,20 +1,20 @@
 # Uncomment this to pass the first stage
 import socket
 import threading
-from _thread import start_new_thread
-print_lock = threading.Lock()
+# from _thread import start_new_thread
+# print_lock = threading.Lock()
 
 def threaded(c):
     # Function gets the connection, checks if it got a ping, returns a pong to it
-    while True:
-        data = c.recv(1024)
-        if not data:
-            print_lock.release()
-            break
-        if data==b"*1\r\n$4\r\nping\r\n":
-            c.send(b"+PONG\r\n")
-        else:
-            c.send(b"-Error message\r\n")
+    # while True:
+    data = c.recv(1024)
+    # if not data:
+    #     print_lock.release()
+    #     break
+    if data==b"*1\r\n$4\r\nping\r\n":
+        c.send(b"+PONG\r\n")
+    else:
+        c.send(b"-Error message\r\n")
     c.close()
 
 def main():
@@ -29,9 +29,12 @@ def main():
     sock.listen()
     while True:
         c, addr = sock.accept()
-        print_lock.acquire()
         print(f"Connected by {addr[0]}")
-        start_new_thread(threaded, (c,))
+        t = threading.Thread(target=threaded, args=(c,))
+        t.start()
+        # print_lock.acquire()
+        
+        # start_new_thread(threaded, (c,))
     sock.close()
     # server_socket = socket.create_server(("localhost", 6379), reuse_port=True)
     # conn, addr = server_socket.accept() # wait for client
