@@ -21,8 +21,6 @@ def threaded(c):
         elif Redis.SET in data:
             redis_object.set_memory(data[Redis.SET][0],data[Redis.SET][1],data)
             c.send(RESPParser.convert_string_to_bulk_string_resp("OK"))
-            print(redis_object.memory)
-            print(redis_object.timeout)
         elif Redis.GET in data:
             result = redis_object.get_memory(data[Redis.GET])
             if result is None:
