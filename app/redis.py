@@ -113,7 +113,7 @@ class Redis:
                 if input[curr]==Redis.LISTENING_PORT:
                     repl_result[Redis.LISTENING_PORT] = input[curr+1]
                     curr+=Redis.LEN_LISTENING_PORT
-                while input[curr]==Redis.CAPABILITY:
+                while curr<len(input) and input[curr]==Redis.CAPABILITY:
                     repl_result[Redis.CAPABILITY] = repl_result.get(Redis.CAPABILITY,[])+[input[curr+1]]
                     curr+=Redis.LEN_CAPABILITY
             else:
