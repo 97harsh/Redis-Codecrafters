@@ -117,8 +117,10 @@ class RedisThread(threading.Thread):
         This function checks if there is any new information in the queue and sends it to the replica server
         """
         while True:
-            if len(self.redis_object.buffer[self.buffer_id])>0:
-                command = self.redis_object.queue.popleft()
+            thread_queue = self.redis_object.buffer[self.buffer_id]
+            if len(thread_queue)>0:
+                command = thread_queue.popleft()
+                print(self.buffer_id, command)
                 self.conn.send(command)
 
 

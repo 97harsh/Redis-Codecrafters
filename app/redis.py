@@ -179,8 +179,8 @@ class Redis:
         """
         This function adds this command to all the buffers talking to the replicas
         """
-        for _,v in self.buffers.items():
-            v.append(command)
+        for k,_ in self.buffers.items():
+            self.buffers[k].append(command)
         return 0
 
     def add_new_replica(self, ):
