@@ -29,6 +29,7 @@ class Redis:
     LEN_SET = 3
     LEN_PING = 1
     LEN_PX = 2
+    LEN_PSYNC = 3
 
     def __init__(self,config):
         self.memory = {}
@@ -116,6 +117,9 @@ class Redis:
                 while curr<len(input) and input[curr]==Redis.CAPABILITY:
                     repl_result[Redis.CAPABILITY] = repl_result.get(Redis.CAPABILITY,[])+[input[curr+1]]
                     curr+=Redis.LEN_CAPABILITY
+            elif input[curr]==Redis.PSYNC:
+                result[Redis.PSYNC] = input[curr+1:]
+                curr+=Redis.LEN_PSYNC
             else:
                 raise ValueError(f"Unknown command {input[curr]}")
         return result
