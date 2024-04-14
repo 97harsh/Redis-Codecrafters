@@ -75,4 +75,5 @@ if __name__ == "__main__":
     parser.add_argument('--replicaof', nargs=2, metavar=('MASTER_HOST','MASTER_PORT'),
                         required=False, default=None)
     args = parser.parse_args()
+    print(args)
     main(args)
