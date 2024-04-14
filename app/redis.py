@@ -6,10 +6,12 @@ from app.parse import RESPParser
 from app.utils import current_milli_time, convert_to_int
 
 class Redis:
+    CAPABILITY = b"capa"
     CONFIG = b"config"
     ECHO = b"echo"
     GET = b"get"
     INFO = b"info"
+    LISTENING_PORT=b"listening-port"
     SET = b"set"
     PING = b"ping"
     PX = b"px"
@@ -17,10 +19,13 @@ class Redis:
     REPLICATION = b"replication"
     RELP_CONF = b"REPLCONF"
 
+    LEN_CAPABILITY = 2
     LEN_CONFIG = 1
     LEN_ECHO = 2
     LEN_GET = 2
     LEN_INFO = 2
+    LEN_LISTENING_PORT = 2
+    LEN_REPL_CONF = 1
     LEN_SET = 3
     LEN_PING = 1
     LEN_PX = 2
@@ -101,6 +106,16 @@ class Redis:
             elif input[curr].lower()==Redis.INFO:
                 result[Redis.INFO] = input[curr+1]
                 curr+=Redis.LEN_INFO
+            elif input[curr]==Redis.RELP_CONF:
+                result[Redis.RELP_CONF] = {}
+                repl_result = result[Redis.RELP_CONF]
+                curr+=Redis.LEN_REPL_CONF
+                if input[curr]==Redis.LISTENING_PORT:
+                    repl_result[Redis.LISTENING_PORT] = input[curr+1]
+                    curr+=Redis.LEN_LISTENING_PORT
+                while input[curr]==Redis.CAPABILITY:
+                    repl_result[Redis.CAPABILITY] = repl_result.get(Redis.CAPABILITY,[])+[input[curr+1]]
+                    curr+=Redis.LEN_CAPABILITY
             else:
                 raise ValueError(f"Unknown command {input[curr]}")
         return result

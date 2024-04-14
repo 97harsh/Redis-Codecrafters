@@ -42,6 +42,8 @@ def threaded(c, redis_object):
         elif Redis.INFO in data:
             info = redis_object.get_info()
             c.send(RESPParser.convert_string_to_bulk_string_resp(info))
+        elif Redis.RELP_CONF in data:
+            c.send(RESPParser.convert_string_to_bulk_string_resp("OK"))
         else:
             c.send(b"-Error message\r\n")
     c.close()
