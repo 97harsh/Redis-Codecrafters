@@ -171,13 +171,11 @@ def main(args):
     sock.bind(("localhost", args.port))
     sock.listen()
 
-    if redis_object.role==Redis.SLAVE and not redis_object.already_connected_master:
+    if redis_object.role==Redis.SLAVE:
         t = RedisMasterConnectThread(redis_object=redis_object)
         t.start()
 
     while True:
-        if redis_object.role==Redis.SLAVE:
-            print(redis_object.memory)
         c, addr = sock.accept()
         print(f"Connected by {addr[0]}")
         t = RedisThread(conn=c, redis_object=redis_object)
