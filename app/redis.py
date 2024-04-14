@@ -26,7 +26,10 @@ class Redis:
         self.memory = {}
         self.timeout = {} # Stores, current time, timeout in ms
         self.config=vars(config)
-        self.role="master"
+        if "replicaof" in config:
+            self.role="slave"
+        else:
+            self.role="master"
 
     def set_memory(self, key, value, data):
         """
