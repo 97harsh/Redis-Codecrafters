@@ -8,13 +8,16 @@ class Redis:
     CONFIG = b"config"
     ECHO = b"echo"
     GET = b"get"
+    INFO = b"info"
     SET = b"set"
     PING = b"ping"
     PX = b"px"
+    REPLICATION = b"replication"
 
     LEN_CONFIG = 1
     LEN_ECHO = 2
     LEN_GET = 2
+    LEN_INFO = 2
     LEN_SET = 3
     LEN_PING = 1
     LEN_PX = 2
@@ -23,6 +26,7 @@ class Redis:
         self.memory = {}
         self.timeout = {} # Stores, current time, timeout in ms
         self.config=vars(config)
+        self.role="master"
 
     def set_memory(self, key, value, data):
         """
@@ -86,6 +90,9 @@ class Redis:
                 if input[curr].lower()==Redis.GET:
                     config_result[Redis.GET] = input[curr+1]
                     curr+=Redis.LEN_GET
+            elif input[curr].lower()==Redis.INFO:
+                result[Redis.INFO] = input[curr+1]
+                curr+=Redis.LEN_INFO
             else:
                 raise ValueError(f"Unknown command {input[curr]}")
         return result
@@ -95,4 +102,7 @@ class Redis:
         Retreives config related information
         """
         key = RESPParser.convert_to_string(key)
-        return self.config.get(key,None) 
+        return self.config.get(key,None)
+    
+    def get_info(self, key=None):
+        return f"role:{self.role}"
