@@ -125,7 +125,7 @@ class Redis:
         client_sock.send(RESPParser.convert_list_to_resp(["ping"]))
         pong = client_sock.recv(1024)
         print(RESPParser.process(pong))
-        if RESPParser.process(pong)==r"PONG":
+        if RESPParser.process(pong)==b"PONG":
             response = [Redis.RELP_CONF,"listening-port",self.config["port"]]
             client_sock.send(RESPParser.convert_list_to_resp(response))
             pong = client_sock.recv(1024)
