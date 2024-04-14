@@ -30,7 +30,6 @@ class Redis:
         self.config=vars(config)
         if self.config["replicaof"]:
             self.role="slave"
-            self.do_handshake()
         else:
             self.role="master"
         self.master_replid = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb"
@@ -125,10 +124,13 @@ class Redis:
         client_sock.connect((MasterHostname,MasterPort))
         client_sock.send(RESPParser.convert_list_to_resp(["ping"]))
         pong = client_sock.recv(1024)
-        if RESPParser.process(pong)=="PONG":
-            response = [Redis.RELP_CONF,"listening-port",self.config["port"]]
-            client_sock.send(RESPParser.convert_list_to_resp(response))
-            response = [Redis.RELP_CONF, "capa psync2"]
-            client_sock.send(RESPParser.convert_list_to_resp(response))
+        print(RESPParser.process(pong))
+        # if RESPParser.process(pong)=="PONG":
+        response = [Redis.RELP_CONF,"listening-port",self.config["port"]]
+        client_sock.send(RESPParser.convert_list_to_resp(response))
+        pong = client_sock.recv(1024)
+        response = [Redis.RELP_CONF, "capa psync2"]
+        client_sock.send(RESPParser.convert_list_to_resp(response))
+        pong = client_sock.recv(1024)
         client_sock.close()
         return

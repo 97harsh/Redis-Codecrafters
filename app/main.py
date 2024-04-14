@@ -57,6 +57,8 @@ def main(args):
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind(("localhost", args.port))
     sock.listen()
+    if redis_object.role=="slave":
+        redis_object.do_handshake()
     while True:
         c, addr = sock.accept()
         print(f"Connected by {addr[0]}")
