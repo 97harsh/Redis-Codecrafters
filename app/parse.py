@@ -10,6 +10,8 @@ class RESPParser:
             result = RESPParser.process_simple_string(string)
         elif string[0:1]==b"*":
             result = RESPParser.process_arrays(string)
+        elif string[0:1]==b"$":
+            result = RESPParser.process_bulk_strings(string)
         else:
             return string
         return result
@@ -23,6 +25,10 @@ class RESPParser:
         # Length list, length item, item, length item, ...'
         # Get every other element
         return input_list[::2][1:]
+
+    def process_bulk_strings(input):
+        input_processed = input.split(b"\r\n")
+        return input_processed[1]
 
     @staticmethod
     def process_simple_string(input):
