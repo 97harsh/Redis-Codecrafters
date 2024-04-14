@@ -65,6 +65,8 @@ class RedisThread(threading.Thread):
             if self.replica_thread:
                 break
             original_message = self.conn.recv(1024)
+            if self.redis_object.replica_present:
+                self.redis_object.queue.append(original_message)
             if not original_message:
                 break
             data = RESPParser.process(original_message)
@@ -101,10 +103,10 @@ class RedisThread(threading.Thread):
                 self.conn.send(RESPParser.convert_string_to_simple_string_resp(f"FULLRESYNC {self.redis_object.master_replid} {self.redis_object.master_repl_offset}"))
                 response = self.redis_object.send_rdb()
                 self.replica_thread=True # if the code reaches ehre, that means it is talking to the replica
+                self.redis_object.replica_present = True
                 self.conn.send(response)
             else:
                 self.conn.send(b"-Error message\r\n")
-            self.redis_object.queue.append(original_message)
         if self.replica_thread and self.redis_object.is_master():
             self.run_sync_replica()
         self.conn.close()
