@@ -1,8 +1,9 @@
+import socket
 from time import time_ns
 from typing import Dict, List
 
 from app.parse import RESPParser
-from app.utils import current_milli_time
+from app.utils import current_milli_time, convert_to_int
 
 class Redis:
     CONFIG = b"config"
@@ -28,6 +29,7 @@ class Redis:
         self.config=vars(config)
         if self.config["replicaof"]:
             self.role="slave"
+            self.do_handshake()
         else:
             self.role="master"
         self.master_replid = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb"
@@ -114,3 +116,12 @@ class Redis:
         info.append(f"master_replid:{self.master_repl_offset}")
         info.append(f"master_repl_offset:{self.master_repl_offset}")
         return "\n".join(info)
+
+    def do_handshake(self,):
+        client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        MasterHostname = self.config['replicaof'][0]
+        MasterPort = convert_to_int(self.config['replicaof'][1])
+        client_sock.connect(MasterHostname,MasterPort)
+        client_sock.send(b"+ping\r\n")
+        client_sock.close()
+        return
