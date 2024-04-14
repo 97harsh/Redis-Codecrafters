@@ -64,7 +64,7 @@ class RedisThread(threading.Thread):
 
     def run(self):
         if self.talk_to_master:
-            self.redis_object.do_handshake(self.conn)
+            self.redis_object.do_handshake()
             self.redis_object.already_connected_master=True
         while True:
             if self.talking_to_replica:
