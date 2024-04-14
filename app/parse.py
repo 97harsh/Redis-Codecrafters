@@ -50,6 +50,7 @@ class RESPParser:
         length = RESPParser.convert_to_binary(len(input))
         output = b"*"+length+b"\r\n"
         for item in input:
+            item = RESPParser.convert_to_string(item)
             len_str = RESPParser.convert_to_binary(len(item))
             output += b"$"+len_str+b"\r\n"+\
                 RESPParser.convert_to_binary(item)+\
