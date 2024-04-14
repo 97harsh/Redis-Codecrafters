@@ -129,7 +129,7 @@ class Redis:
             response = [Redis.RELP_CONF,"listening-port",self.config["port"]]
             client_sock.send(RESPParser.convert_list_to_resp(response))
             pong = client_sock.recv(1024)
-            if pong==b"OK":
+            if RESPParser.process(pong)==b"OK":
                 response = [Redis.RELP_CONF, "capa", "psync2"]
                 client_sock.send(RESPParser.convert_list_to_resp(response))
                 pong = client_sock.recv(1024)
