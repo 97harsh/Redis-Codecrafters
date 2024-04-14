@@ -50,7 +50,7 @@ def main(args):
     redis_object = Redis(config=args)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    sock.bind(("localhost", 6379))
+    sock.bind(("localhost", args.port))
     sock.listen()
     while True:
         c, addr = sock.accept()
@@ -66,6 +66,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--dir', metavar='path', required=False, default=None)
     parser.add_argument('--dbfilename', metavar='str', required=False, default=None)
+    parser.add_argument('--port', metavar='int', required=False, default=6379)
     args = parser.parse_args()
-    print(args)
     main(args)
