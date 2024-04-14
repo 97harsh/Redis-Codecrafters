@@ -44,7 +44,7 @@ class Redis:
             self.role=Redis.MASTER
         self.master_replid = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb"
         self.master_repl_offset = 0
-        self.queue = deque([])
+        self.buffers = {}
         self.replica_present = False
 
     def set_memory(self, key, value, data):
@@ -174,3 +174,21 @@ class Redis:
         Returns true is this server instance is the master server
         """
         return self.role==Redis.MASTER
+
+    def add_command_buffer(self, command):
+        """
+        This function adds this command to all the buffers talking to the replicas
+        """
+        for _,v in self.buffers.items():
+            v.append(command)
+        return 0
+
+    def add_new_replica(self, ):
+        """
+        This function takes care of everything needed to add a new replica
+        1. Create a new buffer
+        Returns the ID of the buffer to use
+        """
+        Id = len(self.buffers)
+        self.buffers[Id] = deque()
+        return Id
