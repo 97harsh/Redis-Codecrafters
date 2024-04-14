@@ -7,11 +7,11 @@ class RESPParser:
         Function identified appropriate way to parse the information in RESP format
         """
         if string[0:1]==b"+":
-            result = RESPParser.process_simple_string(string)
+            result = [RESPParser.process_simple_string(string)]
         elif string[0:1]==b"*":
             result = RESPParser.process_arrays(string)
         elif string[0:1]==b"$":
-            result = RESPParser.process_bulk_strings(string)
+            result = [RESPParser.process_bulk_strings(string)]
         else:
             return string
         return result
