@@ -190,5 +190,5 @@ class Redis:
         Returns the ID of the buffer to use
         """
         Id = len(self.buffers)
-        self.buffers[Id] = deque()
+        self.buffers[Id] = deque([])
         return Id

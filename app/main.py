@@ -118,6 +118,7 @@ class RedisThread(threading.Thread):
         """
         while True:
             thread_queue = self.redis_object.buffers[self.buffer_id]
+            print(thread_queue)
             if len(thread_queue)>0:
                 command = thread_queue.popleft()
                 print(self.buffer_id, command)
