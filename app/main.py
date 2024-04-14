@@ -176,6 +176,8 @@ def main(args):
         t.start()
 
     while True:
+        if redis_object.role==Redis.SLAVE:
+            print(redis_object.memory)
         c, addr = sock.accept()
         print(f"Connected by {addr[0]}")
         t = RedisThread(conn=c, redis_object=redis_object)
