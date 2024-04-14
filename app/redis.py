@@ -13,6 +13,7 @@ class Redis:
     SET = b"set"
     PING = b"ping"
     PX = b"px"
+    PSYNC = b"PSYNC"
     REPLICATION = b"replication"
     RELP_CONF = b"REPLCONF"
 
@@ -125,13 +126,14 @@ class Redis:
         client_sock.send(RESPParser.convert_list_to_resp(["ping"]))
         pong = client_sock.recv(1024)
         print(RESPParser.process(pong))
-        if RESPParser.process(pong)==b"PONG":
-            response = [Redis.RELP_CONF,"listening-port",self.config["port"]]
-            client_sock.send(RESPParser.convert_list_to_resp(response))
-            pong = client_sock.recv(1024)
-            if RESPParser.process(pong)==b"OK":
-                response = [Redis.RELP_CONF, "capa", "psync2"]
-                client_sock.send(RESPParser.convert_list_to_resp(response))
-                pong = client_sock.recv(1024)
+        response = [Redis.RELP_CONF,"listening-port",self.config["port"]]
+        client_sock.send(RESPParser.convert_list_to_resp(response))
+        pong = client_sock.recv(1024)
+        response = [Redis.RELP_CONF, "capa", "eof", "capa", "psync2"]
+        client_sock.send(RESPParser.convert_list_to_resp(response))
+        pong = client_sock.recv(1024)
+        response = [Redis.PSYNC, "?","-1"]
+        client_sock.send(RESPParser.convert_list_to_resp(response))
+        pong = client_sock.recv(1024)
         client_sock.close()
         return
