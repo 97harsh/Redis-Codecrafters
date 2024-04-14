@@ -45,7 +45,7 @@ def threaded(c, redis_object):
         elif Redis.RELP_CONF in data:
             c.send(RESPParser.convert_string_to_bulk_string_resp("OK"))
         elif Redis.PSYNC in data:
-            c.send(RESPParser.convert_string_to_simple_string_resp(f"FULLRESYNC {redis_object.master_replid} 0"))
+            c.send(RESPParser.convert_string_to_simple_string_resp(f"FULLRESYNC {redis_object.master_replid} {redis_object.master_repl_offset}"))
         else:
             c.send(b"-Error message\r\n")
     c.close()
