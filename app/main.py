@@ -1,8 +1,10 @@
 # Uncomment this to pass the first stage
 import socket
 import threading
+
 from app.parse import RESPParser
 from app.redis import Redis
+from app.utils import convert_to_int
 # from _thread import start_new_thread
 
 
@@ -66,6 +68,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--dir', metavar='path', required=False, default=None)
     parser.add_argument('--dbfilename', metavar='str', required=False, default=None)
-    parser.add_argument('--port', metavar='int', required=False, default=6379)
+    parser.add_argument('--port', metavar='int', required=False, default=6379, type=int)
     args = parser.parse_args()
     main(args)
