@@ -55,6 +55,7 @@ from app.utils import convert_to_int
 
 class RedisThread(threading.Thread):
     def __init__(self, conn, redis_object):
+        super().__init__()
         self.redis_object = redis_object
         self.conn = conn
         self.replica_thread=False
