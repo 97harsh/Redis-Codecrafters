@@ -140,11 +140,11 @@ class RedisMasterConnectThread(threading.Thread):
             if not original_message:
                 break
             data = RESPParser.process(original_message)
-            print("slave",data)
             data = self.redis_object.parse_arguments(data)
             if Redis.SET in data:
                 print(f"setting {data[Redis.SET][0]}:{data[Redis.SET][1]}")
                 self.redis_object.set_memory(data[Redis.SET][0],data[Redis.SET][1],data)
+                print(self.redis_object.memory)
             elif Redis.GET in data:
                 result = self.redis_object.get_memory(data[Redis.GET])
                 if result is None:
@@ -170,14 +170,15 @@ def main(args):
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind(("localhost", args.port))
     sock.listen()
-    do_handshake=False
+
     if redis_object.role==Redis.SLAVE and not redis_object.already_connected_master:
         t = RedisMasterConnectThread(redis_object=redis_object)
         t.start()
+
     while True:
         c, addr = sock.accept()
         print(f"Connected by {addr[0]}")
-        t = RedisThread(conn=c, redis_object=redis_object, do_handshake=do_handshake)
+        t = RedisThread(conn=c, redis_object=redis_object)
         # t = threading.Thread(target=threaded, args=(c,redis_object))
         t.start()
 
