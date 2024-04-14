@@ -121,7 +121,7 @@ class Redis:
         client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         MasterHostname = self.config['replicaof'][0]
         MasterPort = convert_to_int(self.config['replicaof'][1])
-        client_sock.connect(MasterHostname,MasterPort)
+        client_sock.connect((MasterHostname,MasterPort))
         client_sock.send(b"+ping\r\n")
         client_sock.close()
         return
