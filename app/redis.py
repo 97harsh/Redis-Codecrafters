@@ -142,12 +142,12 @@ class Redis:
         info.append(f"master_repl_offset:{self.master_repl_offset}")
         return "\n".join(info)
 
-    def do_handshake(self,):
-        client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        MasterHostname = self.config['replicaof'][0]
-        MasterPort = convert_to_int(self.config['replicaof'][1])
-        client_sock.connect((MasterHostname,MasterPort))
-        client_sock.send(RESPParser.convert_list_to_resp(["ping"]))
+    def do_handshake(self,client_sock):
+        # client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # MasterHostname = self.config['replicaof'][0]
+        # MasterPort = convert_to_int(self.config['replicaof'][1])
+        # client_sock.connect((MasterHostname,MasterPort))
+        # client_sock.send(RESPParser.convert_list_to_resp(["ping"]))
         pong = client_sock.recv(1024)
         print(RESPParser.process(pong))
         response = [Redis.RELP_CONF,"listening-port",self.config["port"]]

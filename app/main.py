@@ -54,16 +54,19 @@ from app.utils import convert_to_int
 #     c.close()
 
 class RedisThread(threading.Thread):
-    def __init__(self, conn, redis_object):
+    def __init__(self, conn, redis_object, do_handshake=False):
         super().__init__()
         self.redis_object = redis_object
         self.conn = conn
-        self.replica_thread=False
+        self.talking_to_replica=False
+        self.talk_to_master=do_handshake
         self.buffer_id = None
 
     def run(self):
+        if self.talk_to_master:
+            self.redis_object.do_handshake(self.conn)
         while True:
-            if self.replica_thread:
+            if self.talking_to_replica:
                 break
             original_message = self.conn.recv(1024)
             if not original_message:
@@ -76,7 +79,8 @@ class RedisThread(threading.Thread):
                 self.conn.send(RESPParser.convert_string_to_bulk_string_resp(data[Redis.ECHO]))
             elif Redis.SET in data:
                 self.redis_object.set_memory(data[Redis.SET][0],data[Redis.SET][1],data)
-                self.conn.send(RESPParser.convert_string_to_bulk_string_resp("OK"))
+                if not self.talk_to_master:
+                    self.conn.send(RESPParser.convert_string_to_bulk_string_resp("OK"))
             elif Redis.GET in data:
                 result = self.redis_object.get_memory(data[Redis.GET])
                 if result is None:
@@ -101,14 +105,14 @@ class RedisThread(threading.Thread):
             elif Redis.PSYNC in data:
                 self.conn.send(RESPParser.convert_string_to_simple_string_resp(f"FULLRESYNC {self.redis_object.master_replid} {self.redis_object.master_repl_offset}"))
                 response = self.redis_object.send_rdb()
-                self.replica_thread=True # if the code reaches here, that means it is talking to the replica
+                self.talking_to_replica=True # if the code reaches here, that means it is talking to the replica
                 self.buffer_id = self.redis_object.add_new_replica()
                 self.conn.send(response)
             else:
                 self.conn.send(b"-Error message\r\n")
             if self.redis_object.replica_present and Redis.SET in data:
                 self.redis_object.add_command_buffer(original_message)
-        if self.replica_thread and self.redis_object.is_master():
+        if self.talking_to_replica and self.redis_object.is_master():
             self.run_sync_replica()
         self.conn.close()
 
@@ -134,7 +138,7 @@ def main(args):
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind(("localhost", args.port))
     sock.listen()
-    if redis_object.role=="slave":
+    if redis_object.role==Redis.SLAVE:
         redis_object.do_handshake()
     while True:
         c, addr = sock.accept()
