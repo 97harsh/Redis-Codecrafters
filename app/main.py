@@ -145,6 +145,13 @@ class RedisMasterConnectThread(threading.Thread):
             if Redis.SET in data:
                 print(f"setting {data[Redis.SET][0]}:{data[Redis.SET][1]}")
                 self.redis_object.set_memory(data[Redis.SET][0],data[Redis.SET][1],data)
+            elif Redis.GET in data:
+                result = self.redis_object.get_memory(data[Redis.GET])
+                if result is None:
+                    result = RESPParser.NULL_STRING
+                    self.conn.send(result)
+                else:
+                    self.conn.send(RESPParser.convert_string_to_bulk_string_resp(result))
             else:
                 self.conn.send(b"-Error message\r\n")
             if self.redis_object.replica_present and Redis.SET in data:
