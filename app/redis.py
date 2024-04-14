@@ -26,7 +26,7 @@ class Redis:
         self.memory = {}
         self.timeout = {} # Stores, current time, timeout in ms
         self.config=vars(config)
-        if config["replicaof"]:
+        if self.config["replicaof"]:
             self.role="slave"
         else:
             self.role="master"
