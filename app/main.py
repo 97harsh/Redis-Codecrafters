@@ -63,9 +63,6 @@ class RedisThread(threading.Thread):
         self.buffer_id = None
 
     def run(self):
-        if self.talk_to_master:
-            self.redis_object.do_handshake()
-            self.redis_object.already_connected_master=True
         while True:
             if self.talking_to_replica:
                 break
@@ -145,6 +142,7 @@ class RedisMasterConnectThread(threading.Thread):
             data = RESPParser.process(original_message)
             data = self.redis_object.parse_arguments(data)
             if Redis.SET in data:
+                print(f"setting {data[Redis.SET][0]}:{data[Redis.SET][1]}")
                 self.redis_object.set_memory(data[Redis.SET][0],data[Redis.SET][1],data)
             else:
                 self.conn.send(b"-Error message\r\n")
