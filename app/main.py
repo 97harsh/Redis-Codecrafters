@@ -67,6 +67,7 @@ class RedisThread(threading.Thread):
             if self.talking_to_replica:
                 break
             original_message = self.conn.recv(1024)
+            print(original_message)
             if not original_message:
                 break
             data = RESPParser.process(original_message)
