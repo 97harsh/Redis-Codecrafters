@@ -14,6 +14,7 @@ class Redis:
     PING = b"ping"
     PX = b"px"
     REPLICATION = b"replication"
+    RELP_CONF = b"REPLCONF"
 
     LEN_CONFIG = 1
     LEN_ECHO = 2
@@ -123,5 +124,11 @@ class Redis:
         MasterPort = convert_to_int(self.config['replicaof'][1])
         client_sock.connect((MasterHostname,MasterPort))
         client_sock.send(RESPParser.convert_list_to_resp(["ping"]))
+        pong = client_sock.recv(1024)
+        if RESPParser.process(pong)=="PONG":
+            response = [Redis.RELP_CONF,"listening-port",self.config["port"]]
+            client_sock.send(RESPParser.convert_list_to_resp(response))
+            response = [Redis.RELP_CONF, "capa psync2"]
+            client_sock.send(RESPParser.convert_list_to_resp(response))
         client_sock.close()
         return
