@@ -72,6 +72,6 @@ if __name__ == "__main__":
     parser.add_argument('--dir', metavar='path', required=False, default=None)
     parser.add_argument('--dbfilename', metavar='str', required=False, default=None)
     parser.add_argument('--port', metavar='int', required=False, default=6379, type=int)
-    parser.add_argument('--replicaof', nargs=2, metavar=('MASTER_HOST','MASTER_PORT'), required=False, default=(None,None), type=int)
+    parser.add_argument('--replicaof', nargs=2, metavar=('MASTER_HOST','MASTER_PORT'), required=False, default=None, type=int)
     args = parser.parse_args()
     main(args)
