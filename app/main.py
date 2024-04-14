@@ -63,7 +63,7 @@ class RedisThread(threading.Thread):
     def run(self):
         while True:
             original_message = self.conn.recv(1024)
-            if not data:
+            if not original_message:
                 break
             data = RESPParser.process(original_message)
             data = self.redis_object.parse_arguments(data)
