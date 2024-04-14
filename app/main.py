@@ -4,9 +4,9 @@ import threading
 from app.parse import RESPParser
 from app.redis import Redis
 # from _thread import start_new_thread
-redis_object = Redis()
 
-def threaded(c):
+
+def threaded(c, redis_object):
     # Function runs a thread for a connection
     while True:
         data = c.recv(1024)
@@ -28,16 +28,26 @@ def threaded(c):
                 c.send(result)
             else:
                 c.send(RESPParser.convert_string_to_bulk_string_resp(result))
+        elif Redis.CONFIG in data:
+            config_data = data[Redis.CONFIG]
+            if Redis.GET in config_data:
+                result = redis_object.get_config(config_data[Redis.GET])
+            if result is None:
+                result = RESPParser.NULL_STRING
+                c.send(result)
+            else:
+                c.send(RESPParser.convert_list_to_resp([config_data[Redis.GET],result]))
         else:
             c.send(b"-Error message\r\n")
     c.close()
 
-def main():
+def main(args):
     # You can use print statements as follows for debugging, they'll be visible when running tests.
     print("Logs from your program will appear here!")
 
     # Uncomment this to pass the first stage
     #
+    redis_object = Redis(config=args)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind(("localhost", 6379))
@@ -45,10 +55,16 @@ def main():
     while True:
         c, addr = sock.accept()
         print(f"Connected by {addr[0]}")
-        t = threading.Thread(target=threaded, args=(c,))
+        t = threading.Thread(target=threaded, args=(c,redis_object))
         t.start()
 
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dir', metavar='path', required=False, default=None)
+    parser.add_argument('--dbfilename', metavar='str', required=False, default=None)
+    args = parser.parse_args()
+    main(args)

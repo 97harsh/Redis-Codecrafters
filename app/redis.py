@@ -5,21 +5,24 @@ from app.parse import RESPParser
 from app.utils import current_milli_time
 
 class Redis:
+    CONFIG = b"config"
     ECHO = b"echo"
     GET = b"get"
     SET = b"set"
     PING = b"ping"
     PX = b"px"
 
+    LEN_CONFIG = 1
     LEN_ECHO = 2
     LEN_GET = 2
     LEN_SET = 3
     LEN_PING = 1
     LEN_PX = 2
 
-    def __init__(self):
+    def __init__(self,config):
         self.memory = {}
         self.timeout = {} # Stores, current time, timeout in ms
+        self.config=config
 
     def set_memory(self, key, value, data):
         """
@@ -35,7 +38,7 @@ class Redis:
 
     def get_memory(self, key):
         """
-        Retreives valu for key from memory
+        Retreives value for key from memory
         """
         key = RESPParser.convert_to_string(key)
         if key in self.timeout and self.is_timeout(key):
@@ -53,7 +56,7 @@ class Redis:
         if current_time-key_entered_time>key_life:
             return True
         return False
-    
+
     def parse_arguments(self, input: List) -> Dict:
         """
         Expects a list of input which parses and coverts to a dictionary
@@ -76,6 +79,20 @@ class Redis:
             elif input[curr].lower()==Redis.PX:
                 result[Redis.PX] = input[curr+1]
                 curr+=Redis.LEN_PX
+            elif input[curr].lower()==Redis.CONFIG:
+                result[Redis.CONFIG] = {}
+                curr+=Redis.LEN_CONFIG
+                config_result = result[Redis.CONFIG]
+                if input[curr].lower()==Redis.GET:
+                    config_result[Redis.GET] = input[curr+1]
+                    curr+=Redis.LEN_GET
             else:
                 raise ValueError(f"Unknown command {input[curr]}")
         return result
+
+    def get_config(self, key):
+        """
+        Retreives config related information
+        """
+        key = RESPParser.convert_to_string(key)
+        return self.config.get(key,None)
