@@ -95,4 +95,4 @@ class Redis:
         Retreives config related information
         """
         key = RESPParser.convert_to_string(key)
-        return self.config.get(key,None)
+        return self.config.get(key,None) 
