@@ -58,7 +58,6 @@ class Redis:
             self.timeout[key] = [current_milli_time(),
                                  RESPParser.convert_to_int(data[Redis.PX])]
         self.memory[key] = value
-        print(self.memory)
         return
 
     def get_memory(self, key):

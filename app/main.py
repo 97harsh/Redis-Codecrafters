@@ -140,7 +140,7 @@ class RedisMasterConnectThread(threading.Thread):
             if not original_message:
                 break
             data = RESPParser.process(original_message)
-            print(data)
+            print("slave",data)
             data = self.redis_object.parse_arguments(data)
             if Redis.SET in data:
                 print(f"setting {data[Redis.SET][0]}:{data[Redis.SET][1]}")
