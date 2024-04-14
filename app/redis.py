@@ -127,7 +127,8 @@ class Redis:
                 result[Redis.PSYNC] = input[curr+1:]
                 curr+=Redis.LEN_PSYNC
             else:
-                print(f"Unknown command {input[curr]}")
+                # print(f"Unknown command {input[curr]}")
+                pass
         return result
 
     def get_config(self, key):
