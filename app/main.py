@@ -41,8 +41,7 @@ def threaded(c, redis_object):
                 c.send(RESPParser.convert_list_to_resp([config_data[Redis.GET],result]))
         elif Redis.INFO in data:
             info = redis_object.get_info()
-            for item in info:
-                c.send(RESPParser.convert_string_to_bulk_string_resp(item))
+            c.send(RESPParser.convert_list_to_resp(info))
         else:
             c.send(b"-Error message\r\n")
     c.close()
