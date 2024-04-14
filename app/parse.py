@@ -48,7 +48,7 @@ class RESPParser:
     @staticmethod
     def convert_list_to_resp(input):
         length = RESPParser.convert_to_binary(len(input))
-        output = b"*"+length
+        output = b"*"+length+b"\r\n"
         for item in input:
             len_str = RESPParser.convert_to_binary(len(item))
             output += b"$"+len_str+b"\r\n"+\
