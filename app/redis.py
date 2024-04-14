@@ -122,6 +122,6 @@ class Redis:
         MasterHostname = self.config['replicaof'][0]
         MasterPort = convert_to_int(self.config['replicaof'][1])
         client_sock.connect((MasterHostname,MasterPort))
-        client_sock.send(b"+ping\r\n")
+        client_sock.send(RESPParser.convert_list_to_resp(["ping"]))
         client_sock.close()
         return
