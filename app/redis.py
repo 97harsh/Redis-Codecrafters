@@ -1,3 +1,4 @@
+from collections import deque
 import socket
 from time import time_ns
 from typing import Dict, List
@@ -10,9 +11,11 @@ class Redis:
     CONFIG = b"config"
     ECHO = b"echo"
     GET = b"get"
+    MASTER = "master"
     INFO = b"info"
     LISTENING_PORT=b"listening-port"
     SET = b"set"
+    SLAVE = "slave"
     PING = b"ping"
     PX = b"px"
     PSYNC = b"PSYNC"
@@ -36,12 +39,12 @@ class Redis:
         self.timeout = {} # Stores, current time, timeout in ms
         self.config=vars(config)
         if self.config["replicaof"]:
-            self.role="slave"
+            self.role=Redis.SLAVE
         else:
-            self.role="master"
+            self.role=Redis.MASTER
         self.master_replid = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb"
         self.master_repl_offset = 0
-        self.queue = []
+        self.queue = deque([])
 
     def set_memory(self, key, value, data):
         """
@@ -164,3 +167,9 @@ class Redis:
         len_file = len(file_content)
         response = b"$"+RESPParser.convert_to_binary(len_file)+b"\r\n"+file_content
         return response
+
+    def is_master(self):
+        """
+        Returns true is this server instance is the master server
+        """
+        return self.role==Redis.MASTER

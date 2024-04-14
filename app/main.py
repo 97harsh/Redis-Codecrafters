@@ -62,6 +62,8 @@ class RedisThread(threading.Thread):
 
     def run(self):
         while True:
+            if self.replica_thread:
+                break
             original_message = self.conn.recv(1024)
             if not original_message:
                 break
@@ -98,11 +100,23 @@ class RedisThread(threading.Thread):
             elif Redis.PSYNC in data:
                 self.conn.send(RESPParser.convert_string_to_simple_string_resp(f"FULLRESYNC {self.redis_object.master_replid} {self.redis_object.master_repl_offset}"))
                 response = self.redis_object.send_rdb()
+                self.replica_thread=True # if the code reaches ehre, that means it is talking to the replica
                 self.conn.send(response)
             else:
                 self.conn.send(b"-Error message\r\n")
             self.redis_object.queue.append(original_message)
+        if self.replica_thread and self.redis_object.is_master():
+            self.run_sync_replica()
         self.conn.close()
+
+    def run_sync_replica(self):
+        """
+        This function checks if there is any new information in the queue and sends it to the replica server
+        """
+        while True:
+            if len(self.redis_object.queue)>0:
+                command = self.redis_object.queue.popleft()
+                self.conn.send(command)
 
 
 def main(args):
