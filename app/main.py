@@ -148,8 +148,7 @@ class RedisMasterConnectThread(threading.Thread):
                 self.conn.send(b"-Error message\r\n")
             if self.redis_object.replica_present and Redis.SET in data:
                 self.redis_object.add_command_buffer(original_message)
-        if self.talking_to_replica and self.redis_object.is_master():
-            self.run_sync_replica()
+        print("Closing Replica connection")
         self.conn.close()
 
 def main(args):
