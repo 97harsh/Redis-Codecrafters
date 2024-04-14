@@ -30,6 +30,8 @@ class Redis:
             self.role="slave"
         else:
             self.role="master"
+        self.master_replid = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb"
+        self.master_repl_offset = 0
 
     def set_memory(self, key, value, data):
         """
@@ -108,4 +110,7 @@ class Redis:
         return self.config.get(key,None)
     
     def get_info(self, key=None):
-        return f"role:{self.role}"
+        info = [f"role:{self.role}"]
+        info.append(f"master_replid:{self.master_repl_offset}")
+        info.append(f"master_repl_offset:{self.master_repl_offset}")
+        return info
