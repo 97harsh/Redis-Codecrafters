@@ -67,4 +67,5 @@ if __name__ == "__main__":
     parser.add_argument('--dir', metavar='path', required=False, default=None)
     parser.add_argument('--dbfilename', metavar='str', required=False, default=None)
     args = parser.parse_args()
+    print(args)
     main(args)

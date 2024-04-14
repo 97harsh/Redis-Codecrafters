@@ -22,7 +22,7 @@ class Redis:
     def __init__(self,config):
         self.memory = {}
         self.timeout = {} # Stores, current time, timeout in ms
-        self.config=config
+        self.config=vars(config)
 
     def set_memory(self, key, value, data):
         """
