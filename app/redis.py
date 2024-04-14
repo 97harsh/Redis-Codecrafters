@@ -41,6 +41,7 @@ class Redis:
             self.role="master"
         self.master_replid = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb"
         self.master_repl_offset = 0
+        self.queue = []
 
     def set_memory(self, key, value, data):
         """

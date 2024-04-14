@@ -8,49 +8,101 @@ from app.utils import convert_to_int
 # from _thread import start_new_thread
 
 
-def threaded(c, redis_object):
-    # Function runs a thread for a connection
-    while True:
-        data = c.recv(1024)
-        if not data:
-            break
-        data = RESPParser.process(data)
-        data = redis_object.parse_arguments(data)
-        if Redis.PING in data:
-            c.send(RESPParser.convert_string_to_simple_string_resp(b"PONG"))
-        elif Redis.ECHO in data:
-            c.send(RESPParser.convert_string_to_bulk_string_resp(data[Redis.ECHO]))
-        elif Redis.SET in data:
-            redis_object.set_memory(data[Redis.SET][0],data[Redis.SET][1],data)
-            c.send(RESPParser.convert_string_to_bulk_string_resp("OK"))
-        elif Redis.GET in data:
-            result = redis_object.get_memory(data[Redis.GET])
-            if result is None:
-                result = RESPParser.NULL_STRING
-                c.send(result)
+# def threaded(c, redis_object):
+#     # Function runs a thread for a connection
+#     while True:
+#         original_message = c.recv(1024)
+#         if not data:
+#             break
+#         data = RESPParser.process(original_message)
+#         data = redis_object.parse_arguments(data)
+#         if Redis.PING in data:
+#             c.send(RESPParser.convert_string_to_simple_string_resp(b"PONG"))
+#         elif Redis.ECHO in data:
+#             c.send(RESPParser.convert_string_to_bulk_string_resp(data[Redis.ECHO]))
+#         elif Redis.SET in data:
+#             redis_object.set_memory(data[Redis.SET][0],data[Redis.SET][1],data)
+#             c.send(RESPParser.convert_string_to_bulk_string_resp("OK"))
+#         elif Redis.GET in data:
+#             result = redis_object.get_memory(data[Redis.GET])
+#             if result is None:
+#                 result = RESPParser.NULL_STRING
+#                 c.send(result)
+#             else:
+#                 c.send(RESPParser.convert_string_to_bulk_string_resp(result))
+#         elif Redis.CONFIG in data:
+#             config_data = data[Redis.CONFIG]
+#             if Redis.GET in config_data:
+#                 result = redis_object.get_config(config_data[Redis.GET])
+#             if result is None:
+#                 result = RESPParser.NULL_STRING
+#                 c.send(result)
+#             else:
+#                 c.send(RESPParser.convert_list_to_resp([config_data[Redis.GET],result]))
+#         elif Redis.INFO in data:
+#             info = redis_object.get_info()
+#             c.send(RESPParser.convert_string_to_bulk_string_resp(info))
+#         elif Redis.RELP_CONF in data:
+#             c.send(RESPParser.convert_string_to_bulk_string_resp("OK"))
+#         elif Redis.PSYNC in data:
+#             c.send(RESPParser.convert_string_to_simple_string_resp(f"FULLRESYNC {redis_object.master_replid} {redis_object.master_repl_offset}"))
+#             response = redis_object.send_rdb()
+#             c.send(response)
+#         else:
+#             c.send(b"-Error message\r\n")
+#         redis_object.queue.append(original_message)
+#     c.close()
+
+class RedisThread(threading.Thread):
+    def __init__(self, conn, redis_object):
+        self.redis_object = redis_object
+        self.conn = conn
+        self.replica_thread=False
+
+    def run(self):
+        while True:
+            original_message = self.conn.recv(1024)
+            if not data:
+                break
+            data = RESPParser.process(original_message)
+            data = self.redis_object.parse_arguments(data)
+            if Redis.PING in data:
+                self.conn.send(RESPParser.convert_string_to_simple_string_resp(b"PONG"))
+            elif Redis.ECHO in data:
+                self.conn.send(RESPParser.convert_string_to_bulk_string_resp(data[Redis.ECHO]))
+            elif Redis.SET in data:
+                self.redis_object.set_memory(data[Redis.SET][0],data[Redis.SET][1],data)
+                self.conn.send(RESPParser.convert_string_to_bulk_string_resp("OK"))
+            elif Redis.GET in data:
+                result = self.redis_object.get_memory(data[Redis.GET])
+                if result is None:
+                    result = RESPParser.NULL_STRING
+                    self.conn.send(result)
+                else:
+                    self.conn.send(RESPParser.convert_string_to_bulk_string_resp(result))
+            elif Redis.CONFIG in data:
+                config_data = data[Redis.CONFIG]
+                if Redis.GET in config_data:
+                    result = self.redis_object.get_config(config_data[Redis.GET])
+                if result is None:
+                    result = RESPParser.NULL_STRING
+                    self.conn.send(result)
+                else:
+                    self.conn.send(RESPParser.convert_list_to_resp([config_data[Redis.GET],result]))
+            elif Redis.INFO in data:
+                info = self.redis_object.get_info()
+                self.conn.send(RESPParser.convert_string_to_bulk_string_resp(info))
+            elif Redis.RELP_CONF in data:
+                self.conn.send(RESPParser.convert_string_to_bulk_string_resp("OK"))
+            elif Redis.PSYNC in data:
+                self.conn.send(RESPParser.convert_string_to_simple_string_resp(f"FULLRESYNC {self.redis_object.master_replid} {self.redis_object.master_repl_offset}"))
+                response = self.redis_object.send_rdb()
+                self.conn.send(response)
             else:
-                c.send(RESPParser.convert_string_to_bulk_string_resp(result))
-        elif Redis.CONFIG in data:
-            config_data = data[Redis.CONFIG]
-            if Redis.GET in config_data:
-                result = redis_object.get_config(config_data[Redis.GET])
-            if result is None:
-                result = RESPParser.NULL_STRING
-                c.send(result)
-            else:
-                c.send(RESPParser.convert_list_to_resp([config_data[Redis.GET],result]))
-        elif Redis.INFO in data:
-            info = redis_object.get_info()
-            c.send(RESPParser.convert_string_to_bulk_string_resp(info))
-        elif Redis.RELP_CONF in data:
-            c.send(RESPParser.convert_string_to_bulk_string_resp("OK"))
-        elif Redis.PSYNC in data:
-            c.send(RESPParser.convert_string_to_simple_string_resp(f"FULLRESYNC {redis_object.master_replid} {redis_object.master_repl_offset}"))
-            response = redis_object.send_rdb()
-            c.send(response)
-        else:
-            c.send(b"-Error message\r\n")
-    c.close()
+                self.conn.send(b"-Error message\r\n")
+            self.redis_object.queue.append(original_message)
+        self.conn.close()
+
 
 def main(args):
     # You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -68,7 +120,8 @@ def main(args):
     while True:
         c, addr = sock.accept()
         print(f"Connected by {addr[0]}")
-        t = threading.Thread(target=threaded, args=(c,redis_object))
+        t = RedisThread(conn=c, redis_object=redis_object)
+        # t = threading.Thread(target=threaded, args=(c,redis_object))
         t.start()
 
 
