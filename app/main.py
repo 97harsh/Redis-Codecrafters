@@ -139,6 +139,7 @@ class RedisMasterConnectThread(threading.Thread):
             original_message = self.conn.recv(1024)
             if not original_message:
                 break
+            print(original_message)
             data = RESPParser.process(original_message)
             data = self.redis_object.parse_arguments(data)
             if Redis.SET in data:
