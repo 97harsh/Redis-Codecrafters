@@ -66,8 +66,6 @@ class RedisThread(threading.Thread):
             if self.replica_thread:
                 break
             original_message = self.conn.recv(1024)
-            if self.redis_object.replica_present:
-                self.redis_object.add_command_buffer(original_message)
             if not original_message:
                 break
             data = RESPParser.process(original_message)
@@ -108,6 +106,8 @@ class RedisThread(threading.Thread):
                 self.conn.send(response)
             else:
                 self.conn.send(b"-Error message\r\n")
+            if self.redis_object.replica_present and Redis.SET in data:
+                self.redis_object.add_command_buffer(original_message)
         if self.replica_thread and self.redis_object.is_master():
             self.run_sync_replica()
         self.conn.close()
@@ -120,7 +120,6 @@ class RedisThread(threading.Thread):
             thread_queue = self.redis_object.buffers[self.buffer_id]
             if len(thread_queue)>0:
                 command = thread_queue.popleft()
-                print(self.buffer_id, command)
                 self.conn.send(command)
 
 

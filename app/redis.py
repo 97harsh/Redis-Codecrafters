@@ -181,7 +181,6 @@ class Redis:
         """
         for k,_ in self.buffers.items():
             self.buffers[k].append(command)
-        print(self.buffers)
         return 0
 
     def add_new_replica(self, ):
