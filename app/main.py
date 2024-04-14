@@ -127,6 +127,32 @@ class RedisThread(threading.Thread):
                 command = thread_queue.popleft()
                 self.conn.send(command)
 
+class RedisMasterConnectThread(threading.Thread):
+    def __init__(self, redis_object):
+        """
+        This is class that receives write infoo from master
+        """
+        super().__init__()
+        self.redis_object = redis_object
+        self.conn = None
+
+    def run(self):
+        self.conn = self.redis_object.do_handshake()
+        while True:
+            original_message = self.conn.recv(1024)
+            if not original_message:
+                break
+            data = RESPParser.process(original_message)
+            data = self.redis_object.parse_arguments(data)
+            if Redis.SET in data:
+                self.redis_object.set_memory(data[Redis.SET][0],data[Redis.SET][1],data)
+            else:
+                self.conn.send(b"-Error message\r\n")
+            if self.redis_object.replica_present and Redis.SET in data:
+                self.redis_object.add_command_buffer(original_message)
+        if self.talking_to_replica and self.redis_object.is_master():
+            self.run_sync_replica()
+        self.conn.close()
 
 def main(args):
     # You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -140,9 +166,10 @@ def main(args):
     sock.bind(("localhost", args.port))
     sock.listen()
     do_handshake=False
+    if redis_object.role==Redis.SLAVE and not redis_object.already_connected_master:
+        t = RedisMasterConnectThread(redis_object=redis_object)
+        t.start()
     while True:
-        if redis_object.role==Redis.SLAVE and not redis_object.already_connected_master:
-            do_handshake=True
         c, addr = sock.accept()
         print(f"Connected by {addr[0]}")
         t = RedisThread(conn=c, redis_object=redis_object, do_handshake=do_handshake)
