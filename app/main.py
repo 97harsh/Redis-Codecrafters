@@ -65,6 +65,7 @@ class RedisThread(threading.Thread):
     def run(self):
         if self.talk_to_master:
             self.redis_object.do_handshake(self.conn)
+            self.redis_object.already_connected_master=True
         while True:
             if self.talking_to_replica:
                 break
@@ -139,9 +140,9 @@ def main(args):
     sock.bind(("localhost", args.port))
     sock.listen()
     do_handshake=False
-    if redis_object.role==Redis.SLAVE:
-        do_handshake=True
     while True:
+        if redis_object.role==Redis.SLAVE and not redis_object.already_connected_master:
+            do_handshake=True
         c, addr = sock.accept()
         print(f"Connected by {addr[0]}")
         t = RedisThread(conn=c, redis_object=redis_object, do_handshake=do_handshake)

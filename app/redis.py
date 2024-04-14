@@ -46,6 +46,7 @@ class Redis:
         self.master_repl_offset = 0
         self.buffers = {}
         self.replica_present = False
+        self.already_connected_master = False
 
     def set_memory(self, key, value, data):
         """
