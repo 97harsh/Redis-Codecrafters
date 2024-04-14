@@ -138,12 +138,13 @@ def main(args):
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind(("localhost", args.port))
     sock.listen()
+    do_handshake=False
     if redis_object.role==Redis.SLAVE:
-        redis_object.do_handshake()
+        do_handshake=True
     while True:
         c, addr = sock.accept()
         print(f"Connected by {addr[0]}")
-        t = RedisThread(conn=c, redis_object=redis_object)
+        t = RedisThread(conn=c, redis_object=redis_object, do_handshake=do_handshake)
         # t = threading.Thread(target=threaded, args=(c,redis_object))
         t.start()
 
