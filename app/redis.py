@@ -113,4 +113,4 @@ class Redis:
         info = [f"role:{self.role}"]
         info.append(f"master_replid:{self.master_repl_offset}")
         info.append(f"master_repl_offset:{self.master_repl_offset}")
-        return info
+        return "\n".join(info)
