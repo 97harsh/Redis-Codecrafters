@@ -190,6 +190,7 @@ class Redis:
         1. Create a new buffer
         Returns the ID of the buffer to use
         """
+        self.replica_present = True
         Id = len(self.buffers)
         self.buffers[Id] = deque([])
         return Id
