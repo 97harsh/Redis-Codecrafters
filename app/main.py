@@ -81,6 +81,7 @@ class RedisThread(threading.Thread):
                 if not self.talk_to_master:
                     self.conn.send(RESPParser.convert_string_to_bulk_string_resp("OK"))
             elif Redis.GET in data:
+                print(self.redis_object.memory)
                 result = self.redis_object.get_memory(data[Redis.GET])
                 if result is None:
                     result = RESPParser.NULL_STRING
@@ -145,7 +146,6 @@ class RedisMasterConnectThread(threading.Thread):
             if Redis.SET in data:
                 print(f"setting {data[Redis.SET][0]}:{data[Redis.SET][1]}")
                 self.redis_object.set_memory(data[Redis.SET][0],data[Redis.SET][1],data)
-                print(self.redis_object.memory)
             elif Redis.GET in data:
                 result = self.redis_object.get_memory(data[Redis.GET])
                 if result is None:
@@ -180,7 +180,6 @@ def main(args):
         c, addr = sock.accept()
         print(f"Connected by {addr[0]}")
         t = RedisThread(conn=c, redis_object=redis_object)
-        # t = threading.Thread(target=threaded, args=(c,redis_object))
         t.start()
 
 
