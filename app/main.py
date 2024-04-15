@@ -124,9 +124,10 @@ class RedisThread(threading.Thread):
             thread_queue = self.redis_object.buffers[self.buffer_id]
             if len(thread_queue)>0:
                 command = thread_queue.popleft()
-                # print(f"sending {command}")
+                print(f"sending {command}")
                 self.conn.send(command)
-                self.conn.recv(1024)
+                print(thread_queue)
+                # _ = self.conn.recv(1024)
 
 class RedisMasterConnectThread(threading.Thread):
     def __init__(self, redis_object):
@@ -149,7 +150,7 @@ class RedisMasterConnectThread(threading.Thread):
             if Redis.SET in data:
                 print(f"setting {data[Redis.SET][0]}:{data[Redis.SET][1]}")
                 self.redis_object.set_memory(data[Redis.SET][0],data[Redis.SET][1],data)
-                self.conn.send(RESPParser.convert_string_to_bulk_string_resp("OK"))
+                # self.conn.send(RESPParser.convert_string_to_bulk_string_resp("OK"))
             else:
                 self.conn.send(b"-Error message\r\n")
             if self.redis_object.replica_present and Redis.SET in data:
