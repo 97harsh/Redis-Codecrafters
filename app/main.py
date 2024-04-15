@@ -148,8 +148,8 @@ class RedisMasterConnectThread(threading.Thread):
             data = RESPParser.process(original_message)
             data = self.redis_object.parse_arguments(data)
             if Redis.SET in data:
-                print(f"setting {data[Redis.SET][0]}:{data[Redis.SET][1]}")
-                self.redis_object.set_memory(data[Redis.SET][0],data[Redis.SET][1],data)
+                print(f"setting {data[Redis.SET]}")
+                self.redis_object.set_memory(data[Redis.SET],data)
                 # self.conn.send(RESPParser.convert_string_to_bulk_string_resp("OK"))
             else:
                 self.conn.send(b"-Error message\r\n")
