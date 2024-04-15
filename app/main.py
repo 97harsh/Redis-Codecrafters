@@ -124,8 +124,9 @@ class RedisThread(threading.Thread):
             thread_queue = self.redis_object.buffers[self.buffer_id]
             if len(thread_queue)>0:
                 command = thread_queue.popleft()
-                print(f"sending {command}")
+                # print(f"sending {command}")
                 self.conn.send(command)
+                self.conn.recv(1024)
 
 class RedisMasterConnectThread(threading.Thread):
     def __init__(self, redis_object):
@@ -140,7 +141,7 @@ class RedisMasterConnectThread(threading.Thread):
         self.conn = self.redis_object.do_handshake()
         while True:
             original_message = self.conn.recv(1024)
-            # print(original_message)
+            print(original_message)
             if not original_message:
                 break
             data = RESPParser.process(original_message)
