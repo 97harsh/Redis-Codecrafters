@@ -67,7 +67,7 @@ class RedisThread(threading.Thread):
             if self.talking_to_replica:
                 break
             original_message = self.conn.recv(1024)
-            print(original_message)
+            # print(original_message)
             if not original_message:
                 break
             data = RESPParser.process(original_message)
@@ -78,10 +78,9 @@ class RedisThread(threading.Thread):
                 self.conn.send(RESPParser.convert_string_to_bulk_string_resp(data[Redis.ECHO]))
             elif Redis.SET in data:
                 self.redis_object.set_memory(data[Redis.SET][0],data[Redis.SET][1],data)
-                if not self.talk_to_master:
-                    self.conn.send(RESPParser.convert_string_to_bulk_string_resp("OK"))
+                self.conn.send(RESPParser.convert_string_to_bulk_string_resp("OK"))
             elif Redis.GET in data:
-                print(self.redis_object.memory)
+                # print(self.redis_object.memory)
                 result = self.redis_object.get_memory(data[Redis.GET])
                 if result is None:
                     result = RESPParser.NULL_STRING
@@ -113,6 +112,7 @@ class RedisThread(threading.Thread):
             if self.redis_object.replica_present and Redis.SET in data:
                 self.redis_object.add_command_buffer(original_message)
         if self.talking_to_replica and self.redis_object.is_master():
+            print(f"Connected to replica {self.buffer_id}")
             self.run_sync_replica()
         self.conn.close()
 
@@ -124,6 +124,7 @@ class RedisThread(threading.Thread):
             thread_queue = self.redis_object.buffers[self.buffer_id]
             if len(thread_queue)>0:
                 command = thread_queue.popleft()
+                print(f"sending {command}")
                 self.conn.send(command)
 
 class RedisMasterConnectThread(threading.Thread):
@@ -139,6 +140,7 @@ class RedisMasterConnectThread(threading.Thread):
         self.conn = self.redis_object.do_handshake()
         while True:
             original_message = self.conn.recv(1024)
+            # print(original_message)
             if not original_message:
                 break
             data = RESPParser.process(original_message)
@@ -146,13 +148,7 @@ class RedisMasterConnectThread(threading.Thread):
             if Redis.SET in data:
                 print(f"setting {data[Redis.SET][0]}:{data[Redis.SET][1]}")
                 self.redis_object.set_memory(data[Redis.SET][0],data[Redis.SET][1],data)
-            elif Redis.GET in data:
-                result = self.redis_object.get_memory(data[Redis.GET])
-                if result is None:
-                    result = RESPParser.NULL_STRING
-                    self.conn.send(result)
-                else:
-                    self.conn.send(RESPParser.convert_string_to_bulk_string_resp(result))
+                self.conn.send(RESPParser.convert_string_to_bulk_string_resp("OK"))
             else:
                 self.conn.send(b"-Error message\r\n")
             if self.redis_object.replica_present and Redis.SET in data:
