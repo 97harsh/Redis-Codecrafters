@@ -7,10 +7,12 @@ from app.parse import RESPParser
 from app.utils import current_milli_time, convert_to_int
 
 class Redis:
+    ACK = b"ACK"
     CAPABILITY = b"capa"
     CONFIG = b"config"
     ECHO = b"echo"
     GET = b"get"
+    GETACK = b"GETACK"
     MASTER = "master"
     INFO = b"info"
     LISTENING_PORT=b"listening-port"

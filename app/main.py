@@ -147,10 +147,16 @@ class RedisMasterConnectThread(threading.Thread):
                 break
             data = RESPParser.process(original_message)
             data = self.redis_object.parse_arguments(data)
-            if Redis.SET in data:
+            if Redis.PING in data:
+                pass
+            elif Redis.SET in data:
                 print(f"setting {data[Redis.SET]}")
                 self.redis_object.set_memory(data[Redis.SET],data)
                 # self.conn.send(RESPParser.convert_string_to_bulk_string_resp("OK"))
+            elif Redis.RELP_CONF in data:
+                # If slave connected to master receives it, return this value
+                self.conn.send(RESPParser.convert_list_to_resp([Redis.RELP_CONF,Redis.ACK,
+                                                                self.redis_object.master_repl_offset]))
             else:
                 self.conn.send(b"-Error message\r\n")
             if self.redis_object.replica_present and Redis.SET in data:
