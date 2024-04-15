@@ -48,7 +48,7 @@ class Redis:
         self.replica_present = False
         self.already_connected_master = False
 
-    def set_memory(self, set_vals, data):
+    def set_memory(self, set_vals: List, data: Dict) -> None:
         """
         Stores key value pair in memory 
         """

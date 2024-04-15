@@ -77,7 +77,7 @@ class RedisThread(threading.Thread):
             elif Redis.ECHO in data:
                 self.conn.send(RESPParser.convert_string_to_bulk_string_resp(data[Redis.ECHO]))
             elif Redis.SET in data:
-                self.redis_object.set_memory(data[Redis.SET][0],data[Redis.SET][1],data)
+                self.redis_object.set_memory(data[Redis.SET],data)
                 self.conn.send(RESPParser.convert_string_to_bulk_string_resp("OK"))
             elif Redis.GET in data:
                 # print(self.redis_object.memory)
