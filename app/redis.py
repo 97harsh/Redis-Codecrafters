@@ -48,16 +48,17 @@ class Redis:
         self.replica_present = False
         self.already_connected_master = False
 
-    def set_memory(self, key, value, data):
+    def set_memory(self, set_vals, data):
         """
         Stores key value pair in memory 
         """
-        key = RESPParser.convert_to_string(key)
-        value = RESPParser.convert_to_string(value)
-        if Redis.PX in data:
-            self.timeout[key] = [current_milli_time(),
-                                 RESPParser.convert_to_int(data[Redis.PX])]
-        self.memory[key] = value
+        for i,(key,value) in enumerate(set_vals):
+            key = RESPParser.convert_to_string(key)
+            value = RESPParser.convert_to_string(value)
+            if Redis.PX in data:
+                self.timeout[key] = [current_milli_time(),
+                                    RESPParser.convert_to_int(data[Redis.PX][i])]
+            self.memory[key] = value
         return
 
     def get_memory(self, key):
@@ -95,13 +96,13 @@ class Redis:
                 result[Redis.ECHO] = input[curr+1]
                 curr+=Redis.LEN_ECHO
             elif input[curr].lower()==Redis.SET:
-                result[Redis.SET] = [input[curr+1], input[curr+2]]
+                result[Redis.SET] = result.get(Redis.SET,[])+[[input[curr+1], input[curr+2]]]
                 curr+=Redis.LEN_SET
             elif input[curr].lower()==Redis.GET:
                 result[Redis.GET] = input[curr+1]
                 curr+=Redis.LEN_GET
             elif input[curr].lower()==Redis.PX:
-                result[Redis.PX] = input[curr+1]
+                result[Redis.PX] = result.get(Redis.PX,[]) + [input[curr+1]]
                 curr+=Redis.LEN_PX
             elif input[curr].lower()==Redis.CONFIG:
                 result[Redis.CONFIG] = {}

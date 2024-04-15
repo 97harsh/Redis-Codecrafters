@@ -1,3 +1,4 @@
+from app.utils import flatten_list
 
 class RESPParser:
     NULL_STRING = b"$-1\r\n"
@@ -21,10 +22,11 @@ class RESPParser:
         """
         Returns a list of items received as input string
         """
-        input_list = input.split(b"\r\n")
-        # Length list, length item, item, length item, ...'
-        # Get every other element
-        return input_list[::2][1:]
+        input_list = input.split(b"*")[1:]
+        split = lambda x:  x.split(b"\r\n")[::2][1:] # get every other item
+        input_list = flatten_list([split(x) for x in input_list])
+
+        return input_list
 
     def process_bulk_strings(input):
         input_processed = input.split(b"\r\n")
